@@ -1,5 +1,6 @@
 from sklearn.naive_bayes import GaussianNB
 from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import roc_auc_score, average_precision_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import pandas as pd
@@ -42,4 +43,9 @@ conf_matrix_nb = confusion_matrix(y_test, y_pred_nb)
 print(report_nb)
 print(conf_matrix_nb)
 
-#MISSING OPTIMAL FEATURE SELECTION AND HYPERPARAMETER TUNNING!
+# Calculate and print AUROC and AUPRC
+roc_auc_nb = roc_auc_score(y_test, nb.predict_proba(X_test_scaled)[:, 1])
+precision_recall_auc_nb = average_precision_score(y_test, nb.predict_proba(X_test_scaled)[:, 1])
+
+print("AUROC (Naive Bayes): ", roc_auc_nb)
+print("AUPRC (Naive Bayes): ", precision_recall_auc_nb)

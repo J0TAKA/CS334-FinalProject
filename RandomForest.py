@@ -1,5 +1,6 @@
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import roc_auc_score, average_precision_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import pandas as pd
@@ -42,4 +43,13 @@ conf_matrix_rf = confusion_matrix(y_test, y_pred_rf)
 print(report_rf)
 print(conf_matrix_rf)
 
-#MISSING OPTIMAL FEATURE SELECTION AND HYPERPARAMETER TUNNING!
+# Calculate and print AUROC and AUPRC using the scaled test data
+roc_auc_rf = roc_auc_score(y_test, rf.predict_proba(X_test_scaled)[:, 1])
+precision_recall_auc_rf = average_precision_score(y_test, rf.predict_proba(X_test_scaled)[:, 1])
+
+print("AUROC (Random Forest): ", roc_auc_rf)
+print("AUPRC (Random Forest): ", precision_recall_auc_rf)
+
+# Feature Selection and Hyperparameter Tuning (TO DO)
+# Consider using techniques like RFE, SelectFromModel, or analyzing feature importances
+# Use GridSearchCV or RandomizedSearchCV for systematic hyperparameter optimization

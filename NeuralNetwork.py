@@ -1,5 +1,6 @@
 from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import roc_auc_score, average_precision_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import pandas as pd
@@ -26,7 +27,6 @@ X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
 # Initialize the Neural Network model
-# This is a basic setup; you might need to tune the parameters like number of layers, number of neurons in each layer, etc.
 mlp = MLPClassifier(random_state=42)
 
 # Train the model
@@ -43,4 +43,13 @@ conf_matrix_mlp = confusion_matrix(y_test, y_pred_mlp)
 print(report_mlp)
 print(conf_matrix_mlp)
 
-#MISSING OPTIMAL FEATURE SELECTION AND HYPERPARAMETER TUNNING!
+# Calculate and print AUROC and AUPRC
+roc_auc_mlp = roc_auc_score(y_test, mlp.predict_proba(X_test_scaled)[:, 1])
+precision_recall_auc_mlp = average_precision_score(y_test, mlp.predict_proba(X_test_scaled)[:, 1])
+
+print("AUROC (MLP Classifier): ", roc_auc_mlp)
+print("AUPRC (MLP Classifier): ", precision_recall_auc_mlp)
+
+# Feature Selection and Hyperparameter Tuning (TO DO)
+# Consider tuning hyperparameters like number of layers, neurons per layer, learning rate, etc.
+# Feature selection can be explored as well for model optimization

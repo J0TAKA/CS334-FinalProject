@@ -4,8 +4,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.metrics import roc_auc_score, average_precision_score
-from sklearn.metrics import roc_auc_score, average_precision_score
-
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.metrics import make_scorer, roc_auc_score
 # Load the dataset
 df = pd.read_csv('LongCovidData.csv')
 
@@ -28,56 +28,55 @@ X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
 
 # Initialize the KNN model
-knn = KNeighborsClassifier(n_neighbors=5)
+# knn = KNeighborsClassifier(n_neighbors=5)
 
-# Train the model
-knn.fit(X_train, y_train)
+# # Train the model
+# knn.fit(X_train, y_train)
 
-# Make predictions
-predictions = knn.predict(X_test)
+# # Make predictions
+# predictions = knn.predict(X_test)
 
-# Basic evaluation with classification report and confusion matrix
-print(classification_report(y_test, predictions))
-print(confusion_matrix(y_test, predictions))
+# # Basic evaluation with classification report and confusion matrix
+# print(classification_report(y_test, predictions))
+# print(confusion_matrix(y_test, predictions))
 
-# Additional evaluation for imbalanced dataset
-roc_auc = roc_auc_score(y_test, knn.predict_proba(X_test)[:, 1])
+# # Additional evaluation for imbalanced dataset
+# roc_auc = roc_auc_score(y_test, knn.predict_proba(X_test)[:, 1])
 
-# Calculate AUPRC
-precision_recall_auc = average_precision_score(y_test, knn.predict_proba(X_test)[:, 1])
+# # Calculate AUPRC
+# precision_recall_auc = average_precision_score(y_test, knn.predict_proba(X_test)[:, 1])
 
-print("AUROC: ", roc_auc)
-print("AUPRC: ", precision_recall_auc)
+# print("AUROC: ", roc_auc)
+# print("AUPRC: ", precision_recall_auc)
 
 
 ############### Code to find most acurrate K ###############
+# Define the parameter grid for k
+param_grid = {'n_neighbors': range(1, 31)}
 
-# best_auroc = 0
-# best_auprc = 0
-# best_k_auroc = 0
-# best_k_auprc = 0
+# Create a KNN model
+knn = KNeighborsClassifier()
 
-# for k in range(1, 26):  # Test a range of k values
-#     knn = KNeighborsClassifier(n_neighbors=k)
-#     knn.fit(X_train, y_train)
-    
-#     # Getting the probabilities for positive class
-#     y_proba = knn.predict_proba(X_test)[:, 1]
+# Define the scoring function
+scorer = make_scorer(roc_auc_score, needs_proba=True)
 
-#     # Calculating AUROC and AUPRC
-#     auroc = roc_auc_score(y_test, y_proba)
-#     auprc = average_precision_score(y_test, y_proba)
+# Use GridSearchCV to find the best parameter
+grid_search = GridSearchCV(knn, param_grid, cv=5, scoring=scorer)
+grid_search.fit(X_train, y_train)
 
-#     if auroc > best_auroc:
-#         best_auroc = auroc
-#         best_k_auroc = k
+# Print the best parameter and score
+print("Best parameter: ", grid_search.best_params_)
+print("Best score: ", grid_search.best_score_)
 
-#     if auprc > best_auprc:
-#         best_auprc = auprc
-#         best_k_auprc = k
+# Use the best parameter to create a new model
+knn_best = KNeighborsClassifier(n_neighbors=grid_search.best_params_['n_neighbors'])
+knn_best.fit(X_train, y_train)
 
-# print(f"Best K Value for AUROC: {best_k_auroc} with AUROC: {best_auroc}")
-# print(f"Best K Value for AUPRC: {best_k_auprc} with AUPRC: {best_auprc}")
+# Make predictions with the best model
+predictions = knn_best.predict(X_test)
+
+# Evaluate the model
+print(classification_report(y_test, predictions))
 
 # -----------------------------------------------------------------------
 # Best K Value for AUROC: 25 with AUROC: 0.6261863206648385
