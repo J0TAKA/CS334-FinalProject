@@ -39,17 +39,18 @@ y_pred_mlp = mlp.predict(X_test_scaled)
 report_mlp = classification_report(y_test, y_pred_mlp)
 conf_matrix_mlp = confusion_matrix(y_test, y_pred_mlp)
 
-# Print the evaluation results
 print(report_mlp)
 print(conf_matrix_mlp)
 
-# Calculate and print AUROC and AUPRC
+# Calculate and print AUROC and AUPRC for MLP Classifier
 roc_auc_mlp = roc_auc_score(y_test, mlp.predict_proba(X_test_scaled)[:, 1])
 precision_recall_auc_mlp = average_precision_score(y_test, mlp.predict_proba(X_test_scaled)[:, 1])
 
 print("AUROC (MLP Classifier): ", roc_auc_mlp)
 print("AUPRC (MLP Classifier): ", precision_recall_auc_mlp)
 
+# Additional evaluation for imbalanced dataset (TO DO)
+# Consider evaluating the model performance on an imbalanced dataset.
 # Feature Selection and Hyperparameter Tuning (TO DO)
 # Consider tuning hyperparameters like number of layers, neurons per layer, learning rate, etc.
 # Feature selection can be explored as well for model optimization
