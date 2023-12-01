@@ -3,6 +3,7 @@ from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import pandas as pd
+from sklearn.metrics import roc_auc_score, average_precision_score
 
 # Load the dataset
 df = pd.read_csv('LongCovidData.csv')
@@ -44,3 +45,14 @@ print(report_mlp)
 print(conf_matrix_mlp)
 
 #MISSING OPTIMAL FEATURE SELECTION AND HYPERPARAMETER TUNNING!
+
+# Additional evaluation for imbalanced dataset
+roc_auc = roc_auc_score(y_test, mlp.predict_proba(X_test)[:, 1])
+
+# Calculate AUPRC
+precision_recall_auc = average_precision_score(y_test, mlp.predict_proba(X_test)[:, 1])
+
+
+
+print("AUROC: ", roc_auc)
+print("AUPRC: ", precision_recall_auc)
