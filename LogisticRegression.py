@@ -1,5 +1,6 @@
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import roc_auc_score, average_precision_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import pandas as pd
@@ -42,4 +43,13 @@ conf_matrix_logreg = confusion_matrix(y_test, y_pred_logreg)
 print(report_logreg)
 print(conf_matrix_logreg)
 
-#MISSING PARAMETER TUNNING!
+# Calculate and print AUROC and AUPRC
+roc_auc_logreg = roc_auc_score(y_test, logreg.predict_proba(X_test_scaled)[:, 1])
+precision_recall_auc_logreg = average_precision_score(y_test, logreg.predict_proba(X_test_scaled)[:, 1])
+
+print("AUROC (Logistic Regression): ", roc_auc_logreg)
+print("AUPRC (Logistic Regression): ", precision_recall_auc_logreg)
+
+# Feature Selection and Hyperparameter Tuning (TO DO)
+# Consider tuning hyperparameters like C, penalty, etc.
+# Feature selection can be explored as well for model optimization
