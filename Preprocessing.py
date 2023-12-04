@@ -6,28 +6,46 @@ from scipy.stats import chi2_contingency
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+from sklearn import preprocessing
+import researchpy as rp
 
-# Function to calculate Cramér's V
-def cramers_v(x, y):
-    confusion_matrix = pd.crosstab(x, y)
-    chi2 = chi2_contingency(confusion_matrix)[0]
-    n = confusion_matrix.sum().sum()
-    phi2 = chi2 / n
-    r, k = confusion_matrix.shape
-    phi2_corr = max(0, phi2 - ((k-1)*(r-1))/(n-1))
-    r_corr = r - ((r-1)**2)/(n-1)
-    k_corr = k - ((k-1)**2)/(n-1)
-    return np.sqrt(phi2_corr / min((k_corr-1), (r_corr-1)))
+def main():
+    # Load the dataset
+    df = pd.read_csv('LongCovidData.csv')
 
-# Load the dataset
-df = pd.read_csv('LongCovidData.csv')
-df = df.drop(columns=['Unnamed: 0'])  # Dropping the index column if present
-df['LongCovid'] = df['LongCovid'].apply(lambda x: 0 if x == 2 else 1)
+    # Preprocess the data (handling missing values, encoding, etc.)
+    # Dropping the index column
+    df = df.drop(columns=['Unnamed: 0'])
+    # Recoding LongCovid to Binary Representation 2 = false 1 = true
+    df['LongCovid'] = df['LongCovid'].apply(lambda x: 0 if x == 2 else 1)
 
-# Selecting categorical columns (excluding the target variable)
-categorical_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
-if 'LongCovid' in categorical_cols:
-    categorical_cols.remove('LongCovid')
+    # Load the dataset
+    df = pd.read_csv('LongCovidData.csv')
+
+    # Drop the index column
+    df = df.drop(columns=['Unnamed: 0'])
+
+    # Recoding LongCovid to Binary Representation
+    df['LongCovid'] = df['LongCovid'].apply(lambda x: 0 if x == 2 else 1)
+    df = df.drop(columns=['Pregnant',"Covid"])
+
+
+    sns.set()
+    plt.figure(figsize=(20, 15))
+    ax = plt.subplot(111)
+    # Calculate the correlation matrix
+    corrMat = df.corr(method='spearman')
+    #cramersv_matrix = cramers_v(df)
+    # Create the heatmap
+    ax = sns.heatmap(corrMat, annot=True, annot_kws={"fontsize": 8})
+    #ax = sns.heatmap(cramersv_matrix, annot=True, annot_kws={"fontsize": 8})
+    # Export the heatmap
+    outpath = 'Spearman_Train_heatmap.png'
+    plt.savefig(outpath, dpi=600)
+    # Define your features and target variable
+    X = df.drop('LongCovid', axis=1)
+    y = df['LongCovid']
+    #return_data(df,y)
 
 # Chi-Squared and Cramér's V
 chi_squared_results = {}

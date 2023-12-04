@@ -9,15 +9,6 @@ from sklearn.metrics import make_scorer, roc_auc_score
 # Load the dataset
 df = pd.read_csv('LongCovidData.csv')
 
-# Preprocess the data (handling missing values, encoding, etc.)
-# Dropping the index column
-df = df.drop(columns=['Unnamed: 0'])
-# Recoding LongCovid to Binary Representation 2 = false 1 = true
-df['LongCovid'] = df['LongCovid'].apply(lambda x: 0 if x == 2 else 1)
-
-# Define your features and target variable
-X = df.drop('LongCovid', axis=1)  
-y = df['LongCovid']       
 
 # Split the data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
