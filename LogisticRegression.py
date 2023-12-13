@@ -15,7 +15,7 @@ df = df.drop(columns=['Unnamed: 0'])
 df['LongCovid'] = df['LongCovid'].apply(lambda x: 0 if x == 2 else 1)
 
 # Define your features and target variable
-X = df.drop('LongCovid', axis=1)
+X = df.drop(['LongCovid','Race','Education','Smoker','ECig','Drinker','ExerciseLevel','HeartAttack','HeartDisease','Stroke','Cancer','KidneyDisease','Diabetes','Urban'], axis=1)
 y = df['LongCovid']
 
 # Split the data into training and testing sets
@@ -27,7 +27,7 @@ X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
 # Initialize the Logistic Regression model
-logreg = LogisticRegression(random_state=42)
+logreg = LogisticRegression(random_state=42,C= 0.001, max_iter= 100, penalty= 'l2', solver= 'saga')
 
 # Train the model
 logreg.fit(X_train_scaled, y_train)

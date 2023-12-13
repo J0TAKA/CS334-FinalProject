@@ -1,0 +1,137 @@
+---
+title: "Long_Covid_Data_Cleaning"
+author: "Devin Gee"
+date: "2023-11-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = 'C:/Users/devin/OneDrive/Documents/CS334')
+library("tidyverse")
+library("haven")
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+file <- "LLCP2022.XPT"
+raw <- read_xpt(file,col_select = NULL,skip = 0,n_max = Inf,.name_repair = "unique")
+raw
+varOfInt <- raw %>% select("_STATE","SEQNO","SEXVAR","GENHLTH","PHYSHLTH","MENTHLTH","POORHLTH","MEDCOST1","CHECKUP1","EXERANY2","SLEPTIM1","LASTDEN4","CVDINFR4","CVDCRHD4","CVDSTRK3","ASTHMA3","CHCSCNC1","CHCOCNC1","CHCCOPD3","ADDEPEV3","CHCKDNY2","HAVARTH4","DIABETE4","EDUCA","INCOME3","PREGNANT","WTKG3","HTM4","SMOKDAY2","USENOW3","ECIGNOW2","LCSFIRST","LCSLAST","LCSNUMCG","ALCDAY4","AVEDRNK3","DRNK3GE5","FLUSHOT7","PNEUVAC4","COVIDPOS","COVIDSMP","COVIDPRM","PDIABTS1","PREDIAB2","HPVADVC4","HPVADSHT","SHINGLE2","COVIDVA1","COVIDNU1","FOODSTMP","SDHFOOD1","SDHBILLS","SDHTRNSP","MARIJAN1","MARJSMOK","MARJEAT","MARJVAPE","MARJDAB","MARJOTHR","LASTSMK2","MENTCIGS","MENTECIG","RRCLASS3","_URBSTAT","MSCODE","_RFHLTH","_PHYS14D","_MENT14D","_HLTHPLN","_TOTINDA","_MICHD","_LTASTH1","_RACE1","_SEX","_AGEG5YR","_BMI5CAT","_EDUCAG","_INCOMG1","_SMOKER3","_CURECI2","_RFDRHV8","DIFFWALK","_BMI5")
+```
+```{r}
+longCovidRep<- varOfInt %>% select("SEQNO","_STATE","_RACE1","_SEX","_AGEG5YR","_EDUCAG","_INCOMG1","_SMOKER3","_CURECI2","_RFDRHV8","GENHLTH","PHYSHLTH","MENTHLTH","POORHLTH","MEDCOST1","EXERANY2","SLEPTIM1","CVDINFR4","CVDCRHD4","CVDSTRK3","ASTHMA3","CHCOCNC1","CHCCOPD3","ADDEPEV3","CHCKDNY2","DIABETE4","PREGNANT","WTKG3","HTM4","COVIDPOS","COVIDSMP","COVIDPRM","PREDIAB2","COVIDVA1","FOODSTMP","_URBSTAT","_BMI5")
+```
+
+
+```{r}
+longCovidRep
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+cleaned <- filter(longCovidRep, !is.na(COVIDSMP), COVIDSMP != 7,  COVIDSMP != 9 )
+trun_set <- select(cleaned,-WTKG3,-POORHLTH,-HTM4,-COVIDPRM,-PREDIAB2,-PREGNANT,-COVIDPOS,-FOODSTMP,-COVIDVA1,
+-SEQNO,-"_STATE")
+trun_set
+
+```
+
+```{r}
+apply(X = is.na(trun_set), MARGIN = 2, FUN = sum)
+
+```
+```{r}
+cleaned_trun <- trun_set
+names(cleaned_trun)<- c("Race","Sex","Age","Education","Income","Smoker","ECig","Drinker","GeneralHealth","PhysHealth","MentalHealth","HealthAccess","ExerciseLevel","Sleep","HeartAttack","HeartDisease","Stroke","Asthma","Cancer","COPD","Depression","KidneyDisease","Diabetes","LongCovid","Urban","BMI")
+apply(X = is.na(cleaned_trun), MARGIN = 2, FUN = sum)
+#Race
+cleaned_trun <- cleaned_trun %>% filter( !is.na(Race), Race != 9)
+
+#Age
+cleaned_trun <-  cleaned_trun %>%  filter( Age != 14)
+
+#Education
+cleaned_trun <-  cleaned_trun %>%  filter(Income != 9)
+
+#Smoker
+cleaned_trun <-  cleaned_trun %>% filter(Smoker != 9)
+
+#Ecig
+cleaned_trun <-  cleaned_trun %>% filter( ECig != 9)
+
+#Drinker
+cleaned_trun <-  cleaned_trun %>%  filter(Drinker != 9)
+
+#General Health
+cleaned_trun <-  cleaned_trun %>%  filter(!is.na(GeneralHealth), GeneralHealth != 9, GeneralHealth != 7)
+
+#Physical Health
+cleaned_trun <- cleaned_trun %>% filter(!is.na(PhysHealth), PhysHealth != 99, PhysHealth != 77) %>%
+  mutate(PhysHealth = case_match(PhysHealth, 88 ~ 0, .default = PhysHealth))
+
+#Mental Health
+cleaned_trun <- cleaned_trun %>% filter(!is.na(MentalHealth), MentalHealth != 99, MentalHealth != 77) %>%
+  mutate(MentalHealth = case_match(MentalHealth, 88 ~ 0, .default = MentalHealth))
+
+#Health Access
+cleaned_trun <-  cleaned_trun %>%  filter(!is.na(HealthAccess), HealthAccess != 9, HealthAccess != 7)
+
+#Sleep
+cleaned_trun <- cleaned_trun %>% filter(!is.na(Sleep), Sleep != 99, Sleep != 77)
+
+#Heart Attack
+cleaned_trun <-  cleaned_trun %>%  filter(!is.na(HeartAttack), HeartAttack != 9, HeartAttack != 7)
+#Stroke
+cleaned_trun <-  cleaned_trun %>%  filter(!is.na(Stroke), Stroke != 9, Stroke != 7)
+#Asthma
+cleaned_trun <-  cleaned_trun %>%  filter(!is.na(Asthma), Asthma != 9, Asthma != 7)
+
+#Cancer
+cleaned_trun <-  cleaned_trun %>%  filter(!is.na(Cancer), Cancer != 9, Cancer != 7)
+#COPD
+cleaned_trun <-  cleaned_trun %>%  filter(!is.na(COPD), COPD != 9, COPD != 7)
+#Depression
+cleaned_trun <-  cleaned_trun %>%  filter(!is.na(Depression), Depression != 9, Depression!= 7)
+
+#Kidney Disease
+cleaned_trun <-  cleaned_trun %>%  filter(!is.na(KidneyDisease), KidneyDisease != 9, KidneyDisease != 7)
+#Diabetes
+cleaned_trun <- cleaned_trun %>% filter(!is.na(Diabetes), Diabetes != 9, Diabetes != 7) %>%
+  mutate(Diabetes= case_match(Diabetes, 1 ~ 1,2 ~ 1, 3 ~ 0, 4 ~ 0 ,.default = PhysHealth))
+
+#Pregnant
+#cleaned_trun <- cleaned_trun %>%
+#  mutate(Pregnant= case_match(Pregnant, NA ~ 0,1 ~ 1, 2 ~ 0, .default = Pregnant)) %>% filter(Pregnant != 9, Pregnant != 7)
+
+#COVID
+#cleaned_trun <- cleaned_trun %>% filter(!is.na(Covid), Covid != 9, Covid != 7)  %>%
+ # mutate(Covid= case_match(Covid, 1 ~ 1,2 ~ 0, 3 ~ 1, .default = Covid))
+
+#LongCOVID
+cleaned_trun <- cleaned_trun %>% filter(!is.na(LongCovid), LongCovid != 9, LongCovid != 7)
+#Urban
+#cleaned_trun <- cleaned_trun %>% filter(!is.na(Urban))
+cleaned_trun$Urban[is.na(cleaned_trun$Urban)] <- which.max(tabulate(match(cleaned_trun, unique(cleaned_trun$Urban))))
+
+
+#BMI
+ #cleaned_trun <- cleaned_trun %>% filter(!is.na(BMI))
+cleaned_trun$BMI[is.na(cleaned_trun$BMI)] <- mean(cleaned_trun$BMI[!is.na(cleaned_trun$BMI)])
+
+```
+
+```{r}
+sum(cleaned_trun$LongCovid == 1)/count(cleaned_trun)
+cleaned_trun$ID <- NULL
+write.csv(cleaned_trun, "LongCovidData_V2.csv")
+```
+
